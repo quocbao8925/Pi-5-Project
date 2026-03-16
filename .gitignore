@@ -1,0 +1,47 @@
+# --- Media & Datasets (Video, Ảnh) ---
+*.mp4
+*.avi
+*.mkv
+*.mov
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+# Loại bỏ toàn bộ thư mục chứa dữ liệu hoặc kết quả
+data/
+results/
+runs/
+datasets/
+
+# --- AI Models (Trọng số nặng) ---
+*.pt
+*.onnx
+*.weights
+*.h5
+*_ncnn_model/
+*.bin
+*.param
+
+# --- Python & Environments ---
+ai_env/
+venv/
+.env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+
+# --- OS & IDE Files ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.bak
+
+# --- Logs & Temporary ---
+*.log
+checkpoint/
