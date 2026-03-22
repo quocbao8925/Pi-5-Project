@@ -1,3 +1,4 @@
+
 from ultralytics import YOLO
 import sys
 
@@ -7,13 +8,13 @@ model = YOLO('/home/pi/work/model/last26_ncnn_model', task='detect')
 # 2. Chạy Tracking với cấu hình tối ưu nhất
 # Sử dụng stream=True để không bị tràn RAM
 results = model.track(
-    source='/home/pi/work/data/testvideo1.mp4',
+    source='/home/pi/work/data/testvideo_gmnrcm.mp4',
     conf=0.3,               # Ngưỡng thấp một chút để ByteTrack làm việc tốt hơn
     iou=0.5, 
-    imgsz=480,              # Giữ nguyên 320 để duy trì tốc độ
+    imgsz=320,              # Giữ nguyên 320 để duy trì tốc độ
     persist=True,           # BẮT BUỘC để ByteTrack hoạt động
     tracker="bytetrack.yaml", # Sử dụng ByteTrack (nhẹ hơn BoT-SORT)
-    save=True,              # Lưu kết quả vào folder results
+    save=False,              # Lưu kết quả vào folder results
     project='/home/pi/work/results',
     name='tracking_test',
     exist_ok=True,

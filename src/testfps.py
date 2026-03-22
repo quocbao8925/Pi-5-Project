@@ -2,57 +2,41 @@ import cv2
 import time
 from ultralytics import YOLO
 
-# Configuration
-MODEL_PATH = '/home/pi/work/model/last26_ncnn_model'
-VIDEO_PATH = '/home/pi/work/data/testvideo.mp4'
-IMG_SIZE = 480
-
-# 1. Initialize model and video source
-# Using task='detect' explicitly for NCNN
-model = YOLO(MODEL_PATH, task='detect')
+# Khai báo đường dẫn tuyệt đối
+model = YOLO('/home/pi/work/model/last26h_ncnn_model') 
+VIDEO_PATH = '/home/pi/work/data/testvideo_gmnrcm.mp4'
 cap = cv2.VideoCapture(VIDEO_PATH)
 
-if not cap.isOpened():
-    print("Error: Could not open video file.")
-    exit()
-
-# 2. Warm-up phase
-# Run a few frames to initialize CPU cache and NCNN buffers
-print("Warming up engine...")
-for _ in range(10):
-    ret, frame = cap.read()
-    if not ret: break
-    model.predict(frame, imgsz=IMG_SIZE, verbose=False)
-
-# 3. Peak Performance Benchmark
-print(f"Starting Benchmark at imgsz={IMG_SIZE}...")
+fps_data = [] # Mảng chứa text để ghi file
 frame_count = 0
-start_time = time.time()
+
+print("🚀 Bắt đầu ép xung CPU để quét video và ghi log...")
 
 while cap.isOpened():
-    ret, frame = cap.read()
-    if not ret:
-        break # End of video
+    success, frame = cap.read()
+    if not success:
+        break
     
-    # Run inference only (No plotting, No saving, No logging)
-    model.predict(frame, imgsz=IMG_SIZE, verbose=False)
-    frame_count += 1
-
-    # Optional: Periodic progress check every 100 frames
-    if frame_count % 100 == 0:
-        print(f"Processed {frame_count} frames...")
-
-end_time = time.time()
-
-# 4. Final Calculations
-total_time = end_time - start_time
-avg_fps = frame_count / total_time
-
-print("\n" + "="*40)
-print(f"PEAK PERFORMANCE RESULTS")
-print(f"Total Frames: {frame_count}")
-print(f"Total Time  : {total_time:.2f} seconds")
-print(f"Average FPS : {avg_fps:.2f}")
-print("="*40)
+    start_time = time.time()
+    # Chạy YOLO tinh gọn nhất có thể
+    results = model(frame, imgsz=320, conf=0.5, verbose=False)
+    inference_time = time.time() - start_time
+    
+    if inference_time > 0:
+        fps = 1.0 / inference_time
+        frame_count += 1
+        # Ghi nhận dữ liệu theo chuẩn: Frame,FPS
+        fps_data.append(f"{frame_count},{fps:.2f}\n")
+        
+        # In nhẹ ra terminal mỗi 10 frame cho đỡ lag màn hình
+        if frame_count % 10 == 0:
+            print(f"Đã xử lý {frame_count} frames...")
 
 cap.release()
+
+# Xuất dữ liệu ra file text siêu nhẹ
+log_file = '/home/pi/work/src/fps_log.txt'
+with open(log_file, 'w') as f:
+    f.writelines(fps_data)
+
+print(f"✅ Xong! Đã xuất dữ liệu thô ra file {log_file}")
